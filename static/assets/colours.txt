@@ -1,0 +1,16 @@
+colours
+
+logo colours:
+light: #fff6e8
+dark: #a37b40
+
+colour pallete:
+brown: #4E220F
+light green: #B0BA99
+dark blue: #0A2947
+cherry red: #810B38
+grey bluish: #2C3947
+sky blue super light: #E8EDF2
+
+
+

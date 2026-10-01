@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import profile_tabs %}
+
+{% block title %}My blogs | Petals & Prose{% endblock %}
+
+{% block content %}
+
+<main class="container py-5">
+
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="mb-1">{{ current_user.username }}</h1>
+            <p class="text-muted mb-0">The blogs you own.</p>
+        </div>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('create_blog') }}"><i class="fa-solid fa-plus"></i> Create Blog</a>
+    </div>
+
+    {{ profile_tabs("blogs") }}
+
+    {% if blogs %}
+    <div class="row g-4">
+        {% for blog in blogs %}
+        <div class="col-md-6 col-xl-4">
+            <article class="blog-card h-100">
+                <div class="blog-card-cover" {% if blog.cover_image %}style="background-image: url('{{ blog.cover_url }}')"{% endif %}></div>
+                <div class="blog-card-body">
+                    <h2 class="blog-card-title"><a href="{{ url_for('view_blog', blog_id=blog.id) }}">{{ blog.name }}</a></h2>
+                    <p class="blog-card-desc">{{ blog.description|truncate(120) }}</p>
+                    <p class="small text-muted mb-3">{{ blog.posts|length }} post{{ "" if blog.posts|length == 1 else "s" }}, created {{ blog.created_at|fmt_date }}</p>
+                    <div class="d-flex flex-wrap gap-2 mt-auto">
+                        <a class="btn btn-sm btn-primary" href="{{ url_for('view_blog', blog_id=blog.id) }}">Open</a>
+                        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('create_post', blog_id=blog.id) }}">New post</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('edit_blog', blog_id=blog.id) }}">Edit</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2 class="h5">You don't have a blog yet</h2>
+        <p class="mb-3">A blog is where your posts live. Create one to start writing.</p>
+        <a class="btn btn-primary" href="{{ url_for('create_blog') }}">Create your first blog</a>
+    </div>
+    {% endif %}
+
+</main>
+
+{% endblock %}

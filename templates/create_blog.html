@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import confirm_modal %}
+
+{% block title %}{{ "Edit blog" if is_edit else "Create a blog" }} | Petals & Prose{% endblock %}
+
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <h1 class="mb-1">{{ "Edit blog" if is_edit else "Create a blog" }}</h1>
+            <p class="text-muted mb-4">{{ "Update how your blog looks to readers." if is_edit else "Give your blog a name and a short description. You can change both later." }}</p>
+
+            <div class="panel">
+                {% if is_edit and blog.cover_image %}
+                <img class="img-fluid rounded mb-3 w-100 cover-preview" src="{{ blog.cover_url }}" alt="Current cover image">
+                {% endif %}
+                {{ render_form(form, enctype="multipart/form-data", novalidate=True) }}
+            </div>
+
+            {% if is_edit %}
+            <div class="panel danger-zone mt-4">
+                <h2 class="h5">Delete this blog</h2>
+                <p class="mb-3">This permanently deletes the blog and all of its posts, comments and likes. It can't be undone.</p>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBlogModal">Delete blog</button>
+            </div>
+            <a class="d-inline-block mt-4" href="{{ url_for('view_blog', blog_id=blog.id) }}">Back to the blog</a>
+
+            {{ confirm_modal("deleteBlogModal", "Delete " ~ blog.name ~ "?", "All " ~ (blog.posts|length) ~ " post(s) in this blog, with their comments and likes, will be deleted for good.", url_for('delete_blog', blog_id=blog.id), "Delete blog") }}
+            {% endif %}
+
+        </div>
+    </div>
+</main>
+
+{% endblock %}

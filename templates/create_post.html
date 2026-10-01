@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ "Edit post" if is_edit else "New post" }} | Petals & Prose{% endblock %}
+
+{% block content %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+
+            <h1 class="mb-1">{{ "Edit post" if is_edit else "New post" }}</h1>
+            <p class="text-muted mb-4">
+                {% if is_edit %}Editing a post in{% else %}Writing for{% endif %}
+                <a href="{{ url_for('view_blog', blog_id=blog.id) }}">{{ blog.name }}</a>
+            </p>
+
+            <div class="panel">
+                {% if is_edit and post.image %}
+                <img class="img-fluid rounded mb-3 w-100 cover-preview" src="{{ post.image_url }}" alt="Current header image">
+                {% endif %}
+
+                {{ ckeditor.load() }}
+                {{ ckeditor.config(name='body') }}
+                {{ render_form(form, enctype="multipart/form-data", novalidate=True) }}
+            </div>
+
+            <a class="d-inline-block mt-4" href="{{ url_for('view_post', post_id=post.id) if is_edit else url_for('view_blog', blog_id=blog.id) }}">Cancel</a>
+
+        </div>
+    </div>
+</main>
+
+{% endblock %}

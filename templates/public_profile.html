@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import avatar, blog_card, post_row %}
+
+{% block title %}{{ user.username }} | Petals & Prose{% endblock %}
+
+{% block content %}
+
+<main class="container py-5">
+
+    <div class="profile-head mb-5">
+        {{ avatar(user, "xl") }}
+        <div>
+            <h1 class="mb-1">{{ user.username }}</h1>
+            <p class="text-muted mb-2">Joined {{ user.created_at|fmt_date }}, {{ user.blogs|length }} blog{{ "" if user.blogs|length == 1 else "s" }}, {{ user.posts|length }} post{{ "" if user.posts|length == 1 else "s" }}</p>
+            {% if current_user.is_authenticated and current_user.id == user.id %}
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('profile') }}">Account settings</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="mb-5">
+        <h2 class="section-title">Blogs</h2>
+        {% if user.blogs %}
+        <div class="row g-4">
+            {% for blog in user.blogs %}
+            <div class="col-md-6 col-lg-4">{{ blog_card(blog) }}</div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state"><p class="mb-0">{{ user.username }} doesn't have any blogs yet.</p></div>
+        {% endif %}
+    </section>
+
+    <section class="row">
+        <div class="col-lg-8">
+            <h2 class="section-title">Recent posts</h2>
+            {% for post in posts %}
+            {{ post_row(post, show_blog=True) }}
+            {% else %}
+            <div class="empty-state"><p class="mb-0">{{ user.username }} hasn't published any posts yet.</p></div>
+            {% endfor %}
+        </div>
+    </section>
+
+</main>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row align-items-center">
+
+        <!-- Banner -->
+        <div class="col-lg-8 p-0">
+            <img src="{{ url_for('static', filename='assets/banners/login-banner.jpg') }}" 
+                class="img-fluid w-100"
+                alt="Petals & Prose Banner">
+        </div>
+
+        <!-- Login Form -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+
+                    <h2 class="text-center">Welcome Back!</h2>
+
+                    {{ render_form(form, novalidate=True) }}
+
+                    <p class="text-center mt-3 mb-0">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import avatar, confirm_modal %}
+
+{% block title %}{{ post.title }} | {{ post.blog.name }}{% endblock %}
+
+{% block content %}
+
+<main class="container py-5">
+
+    <article class="article">
+
+        <a class="article-blog" href="{{ url_for('view_blog', blog_id=post.blog_id) }}">{{ post.blog.name }}</a>
+        <h1>{{ post.title }}</h1>
+        {% if post.subtitle %}<p class="subtitle">{{ post.subtitle }}</p>{% endif %}
+
+        <div class="article-byline">
+            <a href="{{ url_for('public_profile', username=post.author.username) }}">{{ avatar(post.author, "md") }}</a>
+            <div>
+                <a class="fw-semibold text-decoration-none" href="{{ url_for('public_profile', username=post.author.username) }}">{{ post.author.username }}</a>
+                <div class="small text-muted">{{ post.created_at|fmt_date }}, {{ post.read_minutes }} min read, {{ post.views }} view{{ "" if post.views == 1 else "s" }}</div>
+            </div>
+
+            {% if is_author or is_owner %}
+            <div class="ms-auto d-flex gap-2">
+                {% if is_author %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('edit_post', post_id=post.id) }}">Edit</a>{% endif %}
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal">Delete</button>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if post.image %}
+        <img class="article-image" src="{{ post.image_url }}" alt="">
+        {% endif %}
+
+        <div class="article-body">{{ post.body|safe }}</div>
+
+        <!-- Likes -->
+        <div class="engage" id="engage">
+            {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('like_post', post_id=post.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="like-btn {{ 'liked' if liked }}" aria-pressed="{{ 'true' if liked else 'false' }}" title="{{ 'Unlike' if liked else 'Like' }}">
+                    <i class="fa-{{ 'solid' if liked else 'regular' }} fa-heart"></i>
+                    <span>{{ post.likes|length }}</span>
+                    <span class="visually-hidden">{{ "likes. Click to unlike." if liked else "likes. Click to like." }}</span>
+                </button>
+            </form>
+            {% else %}
+            <a class="like-btn" href="{{ url_for('login', next=url_for('view_post', post_id=post.id)) }}" title="Log in to like this post">
+                <i class="fa-regular fa-heart"></i> <span>{{ post.likes|length }}</span>
+                <span class="visually-hidden">likes. Log in to like.</span>
+            </a>
+            {% endif %}
+            <a class="engage-link" href="#comments"><i class="fa-regular fa-comment"></i> {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}</a>
+        </div>
+
+        <!-- Comments -->
+        <section id="comments" class="mt-5">
+            <h2 class="h4 mb-3">Comments</h2>
+
+            {% if current_user.is_authenticated %}
+            {{ render_form(form, action=url_for('add_comment', post_id=post.id), novalidate=True) }}
+            {% else %}
+            <p class="empty-state py-3 mb-0">
+                <a href="{{ url_for('login', next=url_for('view_post', post_id=post.id)) }}">Log in</a> or
+                <a href="{{ url_for('register') }}">create an account</a> to join the conversation.
+            </p>
+            {% endif %}
+
+            <div class="mt-4">
+                {% for comment in post.comments %}
+                <div class="comment" id="comment-{{ comment.id }}">
+                    <a href="{{ url_for('public_profile', username=comment.comment_author.username) }}">{{ avatar(comment.comment_author, "sm") }}</a>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-baseline gap-2">
+                            <a class="fw-semibold text-decoration-none" href="{{ url_for('public_profile', username=comment.comment_author.username) }}">{{ comment.comment_author.username }}</a>
+                            <span class="small text-muted">{{ comment.created_at|fmt_datetime }}</span>
+
+                            {% if current_user.is_authenticated and (current_user.id == comment.author_id or is_owner) %}
+                            <form method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}" class="ms-auto" onsubmit="return confirm('Delete this comment?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-link btn-sm text-danger p-0">Delete</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <p class="comment-text">{{ comment.text }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">No comments yet. Start the conversation.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </article>
+
+</main>
+
+{% if is_author or is_owner %}
+{{ confirm_modal("deletePostModal", "Delete this post?", "“" ~ post.title ~ "” and its comments and likes will be deleted for good.", url_for('delete_post', post_id=post.id), "Delete post") }}
+{% endif %}
+
+{% endblock %}

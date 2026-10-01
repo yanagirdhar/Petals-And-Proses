@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import avatar, post_card, blog_card %}
+
+{% block title %}Petals & Prose: a home for your writing{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-xl-7">
+                <h1>Write it down. Let it grow.</h1>
+                <p class="lead">Petals & Prose is a home for blogs of every size. Start a publication, post when you have something to say, and find readers who want to hear it.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if current_user.is_authenticated %}
+                    <a class="btn btn-primary btn-lg" href="{{ url_for('create_blog') }}">Create a blog</a>
+                    <a class="btn btn-outline-primary btn-lg" href="{{ url_for('my_blogs') }}">My blogs</a>
+                    {% else %}
+                    <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}">Start writing</a>
+                    <a class="btn btn-outline-primary btn-lg" href="{{ url_for('login') }}">Log in</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container py-5">
+
+    <div class="row g-5">
+
+        <!-- Latest posts -->
+        <section class="col-lg-8">
+            <h2 class="section-title">Latest posts</h2>
+
+            {% if recent_posts %}
+            <div class="row g-4">
+                {% for post in recent_posts %}
+                <div class="col-md-6">{{ post_card(post) }}</div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <h3 class="h5">Nothing published yet</h3>
+                <p class="mb-3">Be the first to put a post on the page.</p>
+                {% if current_user.is_authenticated %}
+                <a class="btn btn-primary" href="{{ url_for('create_blog') }}">Create a blog</a>
+                {% else %}
+                <a class="btn btn-primary" href="{{ url_for('register') }}">Create an account</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="col-lg-4">
+
+            <section class="mb-5">
+                <h2 class="section-title">Most popular</h2>
+                {% if popular_posts %}
+                <ol class="popular-list">
+                    {% for post in popular_posts %}
+                    <li>
+                        <a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
+                        <div class="small text-muted">{{ post.blog.name }}, {{ post.likes|length }} like{{ "" if post.likes|length == 1 else "s" }}, {{ post.views }} view{{ "" if post.views == 1 else "s" }}</div>
+                    </li>
+                    {% endfor %}
+                </ol>
+                {% else %}
+                <p class="text-muted">Popular posts will show up here once people start reading and liking.</p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2 class="section-title">Writers</h2>
+                {% if top_authors %}
+                <ul class="list-unstyled author-list">
+                    {% for author in top_authors %}
+                    <li>
+                        <a href="{{ url_for('public_profile', username=author.username) }}">
+                            {{ avatar(author, "md") }}
+                            <span>
+                                <strong>{{ author.username }}</strong>
+                                <span class="d-block small text-muted">{{ author.posts|length }} post{{ "" if author.posts|length == 1 else "s" }}</span>
+                            </span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">No writers have published yet.</p>
+                {% endif %}
+            </section>
+
+        </aside>
+    </div>
+
+    <!-- Publications -->
+    <section class="mt-5 pt-3">
+        <h2 class="section-title">Blogs to explore</h2>
+
+        {% if popular_blogs %}
+        <div class="row g-4">
+            {% for blog in popular_blogs %}
+            <div class="col-md-6 col-lg-4">{{ blog_card(blog) }}</div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h3 class="h5">No blogs yet</h3>
+            <p class="mb-0">Blogs appear here as soon as someone creates one.</p>
+        </div>
+        {% endif %}
+    </section>
+
+</main>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{# Small reusable pieces. Macros imported with `from ... import` can't see current_user, so pass what they need. #}
+
+{% macro avatar(user, size="md") %}<img src="{{ user.avatar }}" class="avatar avatar-{{ size }}" alt="{{ user.username }}" loading="lazy">{% endmacro %}
+
+
+{% macro stats(post) %}<span class="post-stats"><i class="fa-regular fa-heart"></i> {{ post.likes|length }} <i class="fa-regular fa-comment ms-2"></i> {{ post.comments|length }}</span>{% endmacro %}
+
+
+{# Card used in grids on the home page #}
+{% macro post_card(post) %}
+<article class="post-card h-100">
+    {% if post.image %}
+    <a href="{{ url_for('view_post', post_id=post.id) }}"><img class="post-card-img" src="{{ post.image_url }}" alt="" loading="lazy"></a>
+    {% endif %}
+    <div class="post-card-body">
+        <a class="post-card-blog" href="{{ url_for('view_blog', blog_id=post.blog_id) }}">{{ post.blog.name }}</a>
+        <h3 class="post-card-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a></h3>
+        <p class="post-card-sub">{{ post.subtitle or (post.body|excerpt(110)) }}</p>
+        <div class="post-card-meta">
+            {{ avatar(post.author, "xs") }}
+            <a href="{{ url_for('public_profile', username=post.author.username) }}">{{ post.author.username }}</a>
+            <span>{{ post.created_at|fmt_date }}</span>
+            <span class="ms-auto">{{ stats(post) }}</span>
+        </div>
+    </div>
+</article>
+{% endmacro %}
+
+
+{# Row used in lists on blog and profile pages #}
+{% macro post_row(post, show_blog=False) %}
+<article class="post-row">
+    <div class="post-row-text">
+        {% if show_blog %}<a class="post-card-blog" href="{{ url_for('view_blog', blog_id=post.blog_id) }}">{{ post.blog.name }}</a>{% endif %}
+        <h3 class="post-row-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a></h3>
+        <p class="post-card-sub">{{ post.subtitle or (post.body|excerpt(160)) }}</p>
+        <div class="post-row-meta">
+            <span>{{ post.created_at|fmt_date }}</span>
+            <span>{{ post.read_minutes }} min read</span>
+            <span>{{ post.views }} view{{ "" if post.views == 1 else "s" }}</span>
+            {{ stats(post) }}
+        </div>
+    </div>
+    {% if post.image %}
+    <a class="post-row-thumb" href="{{ url_for('view_post', post_id=post.id) }}"><img src="{{ post.image_url }}" alt="" loading="lazy"></a>
+    {% endif %}
+</article>
+{% endmacro %}
+
+
+{# Card for a blog (publication) #}
+{% macro blog_card(blog) %}
+<article class="blog-card h-100">
+    <div class="blog-card-cover" {% if blog.cover_image %}style="background-image: url('{{ blog.cover_url }}')"{% endif %}></div>
+    <div class="blog-card-body">
+        <h3 class="blog-card-title"><a href="{{ url_for('view_blog', blog_id=blog.id) }}">{{ blog.name }}</a></h3>
+        <p class="blog-card-desc">{{ blog.description|truncate(120) }}</p>
+        <div class="post-card-meta">
+            {{ avatar(blog.owner, "xs") }}
+            <a href="{{ url_for('public_profile', username=blog.owner.username) }}">{{ blog.owner.username }}</a>
+            <span class="ms-auto">{{ blog.posts|length }} post{{ "" if blog.posts|length == 1 else "s" }}</span>
+        </div>
+    </div>
+</article>
+{% endmacro %}
+
+
+{# Tabs shared by the two profile pages #}
+{% macro profile_tabs(active) %}
+<ul class="nav nav-tabs profile-tabs mb-4">
+    <li class="nav-item"><a class="nav-link {{ 'active' if active == 'settings' }}" href="{{ url_for('profile') }}">Account settings</a></li>
+    <li class="nav-item"><a class="nav-link {{ 'active' if active == 'blogs' }}" href="{{ url_for('my_blogs') }}">My blogs</a></li>
+</ul>
+{% endmacro %}
+
+
+{# Confirmation dialog for destructive POST actions. Open it with data-bs-toggle="modal" data-bs-target="#<id>". #}
+{% macro confirm_modal(id, title, message, action, button_label) %}
+<div class="modal fade" id="{{ id }}" tabindex="-1" aria-labelledby="{{ id }}Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="{{ id }}Label">{{ title }}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">{{ message }}</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ action }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">{{ button_label }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
