@@ -1,5 +1,4 @@
 # Petals & Prose
-#### Video Demo: https://youtu.be/HvWm6281tXw
 #### Description:
 
 **Petals & Prose** is a Substack-style blogging platform built with Python, Flask and SQLite. Anyone can register, create one or more *blogs* (think of them as publications, each with its own name, description and cover image), publish rich-text *posts* inside those blogs, and read, like and comment on other people's writing. Every writer gets a public profile, and the home page surfaces recent posts, popular posts, popular blogs and the most active authors, so a new visitor immediately sees what the community is writing.
@@ -66,7 +65,3 @@ comments    id, post_id → posts, author_id → users, text, created_at
 ## Limitations and future work
 
 The tables are created with `db.create_all()`, which doesn't alter existing tables, so changing the models on a database with real data would call for Flask-Migrate. Uploaded files live on local disk, which is fine for development but would need persistent storage on hosts with an ephemeral filesystem. Natural next steps are following authors, search, tags, pagination on the home page and email verification.
-
-## AI usage
-
-As permitted for the final project, I used an AI assistant (Claude by Anthropic) as a helper while developing and refactoring parts of this project. The idea, the design decisions and the overall structure are my own, and the use of AI is cited in the comments of my code.
